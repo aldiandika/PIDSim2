@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_halaman_menu"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.kapak_merah.pidsim.HalamanUtama">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="100dp"
+        android:paddingLeft="100dp"
+        android:paddingRight="100dp"
+        android:paddingTop="100dp"
+        android:background="@drawable/latar_latar"
+        android:orientation="vertical">
+
+
+
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="theory"
+            android:typeface="sans"
+            android:textStyle="bold"
+            android:textAllCaps="false"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/btn_ripple_u"
+            android:textColor="@android:color/white"
+            android:textSize="28sp"
+            android:id="@+id/teoriDasar"
+            android:onClick="dasarTeori"
+            android:layout_marginBottom="16dp"/>
+        <!--//ganti background jdi rounded button_ripple_u klo api <21-->
+
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="simulation"
+            android:typeface="sans"
+            android:textStyle="bold"
+            android:textAllCaps="false"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/btn_ripple_u1"
+            android:textColor="@android:color/white"
+            android:textSize="28sp"
+            android:id="@+id/simulasi"
+            android:layout_marginBottom="16dp"
+            android:onClick="simulate"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="quiz"
+            android:typeface="sans"
+            android:textStyle="bold"
+            android:textAllCaps="false"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/btn_ripple_u2"
+            android:textColor="@android:color/white"
+            android:textSize="28sp"
+            android:id="@+id/latihanSoal"
+            android:layout_marginBottom="16dp"
+            android:onClick="latihanSoal"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_gravity="center_horizontal"
+            android:text="about"
+            android:typeface="sans"
+            android:textStyle="bold"
+            android:textAllCaps="false"
+            android:background="@drawable/btn_ripple_u3"
+            android:textColor="@android:color/white"
+            android:textSize="28sp"
+            android:id="@+id/about"
+            android:onClick="about"/>
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,48 @@
+<resources>
+    <string name="app_name">PID Simulation</string>
+    <string name="judul">Kontrol Proporsional-Integral-Derivatif (PID)</string>
+    <string name="konten">Kontrol PID merupakan sistem kontrol yang cukup populer digunakan di industri, diterapkan pada berbagai sistem seperti mekanik, pneumatik dan elektrik. Seiring dengan kemajuan teknologi, saat ini kontrol PID telah diimplementasikan secara digital dalam mikroprosessor.</string>
+    <string name="konten2">Blok diagram kontrol PID ditampilkan pada Gambar 1, nampak sinyal error digunakan untuk membangkitkan aksi proporsional, integral dan deripatif. Sinyal kontrol PID atau u(t), nantinya akan diaplikasikan ke proses untuk memperoleh unjuk kerja yang diharapkan.</string>
+    <string name="konten3">Fungsi PID dapat dinyatakan dalam persamaan berikut :</string>
+    <string name="keterangan">Keterangan :</string>
+    <string name="ket1">u(t), sinyal kontrol ke plant</string>
+    <string name="ket2">Kp, penguatan proporsional</string>
+    <string name="ket3">r(t), sinyal referensi atau masukan</string>
+    <string name="ket4">e(t) sinyal error yaitu selisih sinyal referensi terhadap sinyal keluaran, dimana e(t)=r(t)-y(t)</string>
+    <string name="title_activity_simulasi">Simulasi</string>
+
+    <string name="judulZN">Metode Ziegler Nichols</string>
+    <string name="kontenZN1a">1.	Metode Ziegler Nichols tipe \n \n \u0020 \u0020 Tuning Ziegler Nichols tipe 1 merupakan salah satu metode penentuan parameter kontroler PID, dimana nilai PID didapatkan dari hasil percobaan dengan memasukan unit-step. Hasil dari percobaan akan terbentuk kurva huruf S. Kurva S ditunjukan pada gambar berikut.</string>
+    <string name="ketZN1a">Gambar 1. Kurva S</string>
+    <string name="kontenZN1b"> \u0020 \u0020 Kurva bentuk S memiliki karakteristik dengan dua buah konstanta, yaitu waktu tunda (L) dan waktu konstan (T). Kedua parameter tersebut diperoleh dengan menggambar garis tangensial pada titik infleksi kurva S dan memperoleh perpotongan garis tangensial dengan garis axis waktu dan garis c(t) = K. \n \n  \u0020  \u0020  Setelah parameter L dan T didapatkan maka nilai Kp, Ti, dan Td dapat dihitung dengan menggunakan rumus parameter PID untuk metode Ziegler Nichols tipe 1. Tabel 1 menunjukan tabel parameter PID untuk metode ZN tipe 1.</string>
+    <string name="ketZN1b">Tabel 1. Parameter PID untuk metode ZN tipe 1</string>
+    <string name="kontenZN2a">2.	Metode Ziegler Nichols tipe 2 \n \n \u0020 Dalam metode ZN tipe 2, digunakan sistem close loop. Namun yang digunakan hanya nilai Kp saja. Sistem dibuat hingga berosilasi terus menerus dengan mengatur besarnya nilai Kp.</string>
+    <string name="ketZN2a">Gambar 2. Sistem close loop dengan menggunakan nilai Kp saja</string>
+    <string name="kontenZN2b"> \u0020 \u0020 Besarnya nilai Kp saat respon sistem berosilasi terus menerus merupakan nilai Kp Ultimate. Dari respon yang dihasilkan, parameter lain ZN tipe 2 selain nilai KpU (Kp Ultimate) yaitu nilai Tu (Time Ultimate) dapat dicari. Proses menentukan parameter Tu ditunjukan pada gambar berikut.</string>
+    <string name="ketZN2b">Gambar 3. Proses menentukan parameter Tu</string>
+    <string name="kontenZN2c"> \u0020 \u0020 Setelah parameter KpU dan Tu didapatkan, nilai-nilai Kp, Ti, dan Td dapat dihitung menggunakan rumus-rumus parameter PID untuk ZN tipe 2. Tabel 2 menunjukan tabel parameter PID untuk metode ZN tipe 2.</string>
+    <string name="ketZN2c">Tabel 2. Parameter PID untuk metode ZN tipe 2</string>
+    
+    <string name="next">NEXT</string>
+    <string name="skip">SKIP</string>
+    <string name="start">GOT IT</string>
+
+    <string name="about">Seiring dengan tumbuhnya upaya untuk mendidik dan mempersiapkan ahli dalam bidang teknik otomasi di Indonesia melalui berbagai lembaga pendidikan, dan hal tersebut perlu didukung dengan ketersediaan alat penunjang pembelajaran yang sesuai.</string>
+    <string name="about2">Dinotera lahir dan tumbuh dalam rangka menjawab kebutuhan tersebut dan turut aktif berkontribusi dalam menciptakan alat peraga untuk menunjang pendidikan yang lebih baik dan berkualitas.</string>
+
+    <string name="slide_1_title">Hello Food!</string>
+    <string name="slide_1_desc">The easiest way to order food from your favourite restaurant!</string>
+
+    <string name="slide_2_title">Movie Tickets</string>
+    <string name="slide_2_desc">Book movie tickets for your family and friends!</string>
+
+    <string name="slide_3_title">Great Discounts</string>
+    <string name="slide_3_desc">Best discounts on every single service we offer!</string>
+
+    <string name="slide_4_title">World Travel</string>
+    <string name="slide_4_desc">Book tickets of any transportation and travel the world!</string>
+
+    <string name="play_again_desc">To see the welcome slider again, goto Settings -> apps -> welcome slider -> clear data</string>
+    <string name="play_again">Play Again</string>
+    <string name="mail"><u>klien.dinotera@gmail.com</u>.</string>
+</resources>
