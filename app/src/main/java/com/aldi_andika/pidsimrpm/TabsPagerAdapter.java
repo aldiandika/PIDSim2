@@ -1,4 +1,4 @@
-package com.kapak_merah.pidsim;
+package com.aldi_andika.pidsimrpm;
 
 /**
  * Created by lenovo on 10/14/2017.
@@ -7,8 +7,6 @@ package com.kapak_merah.pidsim;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.T;
 
 public class TabsPagerAdapter extends FragmentPagerAdapter {
 

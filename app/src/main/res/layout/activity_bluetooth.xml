@@ -10,7 +10,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:orientation="vertical"
     android:background="@drawable/latar"
-    tools:context="com.kapak_merah.pidsim.Bluetooth">
+    tools:context="com.aldi_andika.pidsimrpm.Bluetooth">
 
     <!--<LinearLayout-->
         <!--android:layout_width="match_parent"-->

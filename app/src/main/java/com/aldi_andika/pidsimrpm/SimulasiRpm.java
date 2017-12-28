@@ -1,11 +1,8 @@
-package com.kapak_merah.pidsim;
+package com.aldi_andika.pidsimrpm;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -18,7 +15,6 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.CompoundButton;
@@ -44,9 +40,8 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class Simulation extends AppCompatActivity {
+public class SimulasiRpm extends AppCompatActivity {
 
-    simulasi sim;
     public static BluetoothAdapter mBluetooth = null;
     public static double nilaiRedaman;
     public int nilaiSp,nilaiKp,nilaiKi,nilaiKd,nilaiKpegas,nilaiKredaman,
@@ -59,16 +54,17 @@ public class Simulation extends AppCompatActivity {
     public String PREFS_NAME = "simpanan",strDate;
     public LineGraphSeries<DataPoint> series,series2,series3;
 
-    SeekBar sp,Kp,Ki,Kd,Kpegas,Kredaman,objSim;
+    SeekBar sp,Kp,Ki,Kd;
     RadioGroup toggle;
-    RadioButton errorBtn,posisiBtn;
-    EditText tampilSp,tampilKp,tampilKi,tampilKd,tampilKpegas,tampilKredaman;
-    TextView tampilError,tampilPosisi;
+    RadioButton errorBtn,rpmBtn;
+    EditText tampilSp,tampilKp,tampilKi,tampilKd;
+    TextView tampilError,tampilRpm;
     GraphView graph,graph2;
-    ImageButton start,stop,refresh,kirim;
+    ImageButton start,stop,refresh,kirimData;
     Thread mulaiSim;
     InputStream mmInputStream;
     ToggleButton loger;
+    ImageView wheel;
     byte[] readBuffer;
     int readBufferPosition;
     volatile boolean stopWorker;
@@ -82,40 +78,37 @@ public class Simulation extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         overridePendingTransition(R.anim.fadein, R.anim.fadeout);
-        setContentView(R.layout.activity_simulation);
+        setContentView(R.layout.activity_simulasi_rpm);
+
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        sim = (simulasi) findViewById(R.id.simulasi);
+
+        wheel = (ImageView) findViewById(R.id.wheel);
 
         tampilError = (TextView)findViewById(R.id.error);
-        tampilPosisi = (TextView)findViewById(R.id.posisi);
+        tampilRpm = (TextView)findViewById(R.id.txt_rpm);
 
         start = (ImageButton)findViewById(R.id.start);
         stop = (ImageButton)findViewById(R.id.stop);
         refresh = (ImageButton)findViewById(R.id.reset);
-        kirim = (ImageButton)findViewById(R.id.kirim) ;
+        kirimData = (ImageButton)findViewById(R.id.kirimData) ;
         loger = (ToggleButton)findViewById(R.id.log);
 
-//        objSim = (SeekBar)findViewById(R.id.objekSimu);
+        toggle = (RadioGroup)findViewById(R.id.toggle);
+        errorBtn = (RadioButton)findViewById(R.id.errorBtn);
+        rpmBtn = (RadioButton)findViewById(R.id.rpmBtn);
+
         sp = (SeekBar)findViewById(R.id.seekSp);
         Kp = (SeekBar)findViewById(R.id.seekKp);
         Ki = (SeekBar)findViewById(R.id.seekKi);
         Kd = (SeekBar)findViewById(R.id.seekKd);
-        Kpegas = (SeekBar)findViewById(R.id.seekKpegas);
-        Kredaman = (SeekBar)findViewById(R.id.seekKredaman);
         tampilSp = (EditText)findViewById(R.id.editSp);
         tampilKp = (EditText)findViewById(R.id.editKp);
         tampilKi = (EditText)findViewById(R.id.editKi);
         tampilKd = (EditText)findViewById(R.id.editKd);
-        tampilKpegas = (EditText)findViewById(R.id.editKpegas);
-        tampilKredaman = (EditText)findViewById(R.id.editKredaman);
-        toggle = (RadioGroup)findViewById(R.id.toggle);
-        errorBtn = (RadioButton)findViewById(R.id.errorBtn);
-        posisiBtn = (RadioButton)findViewById(R.id.posisiBtn);
 
-        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-
-        posisiBtn.setChecked(true);
+        rpmBtn.setChecked(true);
         stop.setEnabled(false);
 
         SharedPreferences parameter = getSharedPreferences(PREFS_NAME,0);
@@ -123,15 +116,11 @@ public class Simulation extends AppCompatActivity {
         posKp = parameter.getInt("saveKp",nilaiKp);
         posKi = parameter.getInt("saveKi",nilaiKd);
         posKd = parameter.getInt("saveKd",nilaiKi);
-        posKpegas = parameter.getInt("saveKpegas",nilaiKpegas);
-        posKredaman = parameter.getInt("saveKredaman",nilaiKredaman);
-//        objSim.setProgress(50);
+
         sp.setProgress(posSp);
         Kp.setProgress(posKp);
         Ki.setProgress(posKi);
         Kd.setProgress(posKd);
-        Kpegas.setProgress(posKpegas);
-        Kredaman.setProgress(posKredaman);
 
         tampilSp.setText(String.valueOf(posSp));
         tampilSp.setSelection(tampilSp.getText().length());
@@ -145,22 +134,17 @@ public class Simulation extends AppCompatActivity {
         tampilKd.setText(String.valueOf(posKd));
         tampilKd.setSelection(tampilKd.getText().length());
 
-        tampilKpegas.setText(String.valueOf(posKpegas));
-        tampilKpegas.setSelection(tampilKpegas.getText().length());
-
-        tampilKredaman.setText(String.valueOf(posKredaman));
-        tampilKredaman.setSelection(tampilKredaman.getText().length());
-
         loger.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (!isChecked){
-                    showToast("Log saved in storage/PIDSimu/" +gpxfile.getName(), 6000);
+                    showToast("Log saved in storage/PIDRPMSimu/" +gpxfile.getName(), 6000);
                 } else {
                     msg("Log started");
                 }
             }
         });
+
         sp.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
 
 
@@ -275,44 +259,6 @@ public class Simulation extends AppCompatActivity {
                 if(Bluetooth.isBtConnected && (!start.isEnabled())){
                     new send(tampilSp, tampilKp, tampilKi, tampilKd).execute();
                 }
-            }
-        });
-        Kpegas.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
-
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress,
-                                          boolean fromUser) {
-                // TODO Auto-generated method stub
-                tampilKpegas.setText(String.valueOf(progress));
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
-            }
-        });
-        Kredaman.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
-
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress,
-                                          boolean fromUser) {
-                // TODO Auto-generated method stub
-                tampilKredaman.setText(String.valueOf(progress));
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
             }
         });
 
@@ -430,50 +376,6 @@ public class Simulation extends AppCompatActivity {
                 tampilKd.setSelection(tampilKd.getText().length());
             }
         });
-        tampilKpegas.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if((tampilKpegas.getText().toString()).matches("")){
-                    Kpegas.setProgress(0);
-                }else {
-                    nilaiKpegas = Integer.parseInt(tampilKpegas.getText().toString());
-                    Kpegas.setProgress(nilaiKpegas);
-                }
-                tampilKpegas.setSelection(tampilKpegas.getText().length());
-            }
-        });
-        tampilKredaman.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if((tampilKredaman.getText().toString()).matches("")){
-                    Kredaman.setProgress(0);
-                }else {
-                    nilaiKredaman = Integer.parseInt(tampilKredaman.getText().toString());
-                    Kredaman.setProgress(nilaiKredaman);
-                }
-                tampilKredaman.setSelection(tampilKredaman.getText().length());
-            }
-        });
 
         graph = (GraphView)findViewById(R.id.graf);
         graph2 = (GraphView)findViewById(R.id.graf2);
@@ -487,18 +389,18 @@ public class Simulation extends AppCompatActivity {
         graph.getGridLabelRenderer().setNumHorizontalLabels(11);
         graph.getGridLabelRenderer().setNumVerticalLabels(11);
         graph.getGridLabelRenderer().setHorizontalAxisTitle("Waktu(s)");
-        graph.getGridLabelRenderer().setVerticalAxisTitle("Posisi(cm)");
+        graph.getGridLabelRenderer().setVerticalAxisTitle("RPM(rad/m)");
         graph.getGridLabelRenderer().setLabelVerticalWidth(60);
         graph.getGridLabelRenderer().setLabelsSpace(5);
 
         graph2.getGridLabelRenderer().setNumHorizontalLabels(11);
         graph2.getGridLabelRenderer().setNumVerticalLabels(11);
         graph2.getGridLabelRenderer().setHorizontalAxisTitle("Waktu(s)");
-        graph2.getGridLabelRenderer().setVerticalAxisTitle("Posisi(cm)");
+        graph2.getGridLabelRenderer().setVerticalAxisTitle("RPM(rad/m)");
         graph2.getGridLabelRenderer().setLabelVerticalWidth(75);
         graph2.getGridLabelRenderer().setLabelsSpace(5);
 
-        posisiBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        rpmBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
@@ -510,7 +412,7 @@ public class Simulation extends AppCompatActivity {
                     graph.getGridLabelRenderer().setNumHorizontalLabels(11);
                     graph.getGridLabelRenderer().setNumVerticalLabels(11);
                     graph.getGridLabelRenderer().setHorizontalAxisTitle("Waktu(s)");
-                    graph.getGridLabelRenderer().setVerticalAxisTitle("Posisi(cm)");
+                    graph.getGridLabelRenderer().setVerticalAxisTitle("RPM(rad/m)");
                     graph.getGridLabelRenderer().setLabelVerticalWidth(60);
                     graph.getGridLabelRenderer().setLabelsSpace(5);
                     Viewport viewport = graph.getViewport();
@@ -524,45 +426,13 @@ public class Simulation extends AppCompatActivity {
             }
         });
 
-        errorBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    graph2.setVisibility(View.VISIBLE);
-                    graph.setVisibility(View.GONE);
-                    graph2.addSeries(series3);
-                    graph2.getGridLabelRenderer().setNumHorizontalLabels(11);
-                    graph2.getGridLabelRenderer().setNumVerticalLabels(11);
-                    graph2.getGridLabelRenderer().setHorizontalAxisTitle("Waktu(s)");
-                    graph2.getGridLabelRenderer().setVerticalAxisTitle("Posisi(cm)");
-                    graph2.getGridLabelRenderer().setLabelVerticalWidth(75);
-                    graph2.getGridLabelRenderer().setLabelsSpace(5);
-                    Viewport viewport = graph2.getViewport();
-                    viewport.setXAxisBoundsManual(true);
-                    viewport.setMinX(0);
-                    viewport.setMaxX(100);
-                    viewport.setScalable(true);
-                    viewport.setScrollableY(true);
-                    viewport.setScrollable(true);
-                }
-            }
-        });
-
         if(Bluetooth.isBtConnected){
-            Kpegas.setEnabled(false);
-            Kredaman.setEnabled(false);
-            tampilKpegas.setEnabled(false);
-            tampilKredaman.setEnabled(false);
             refresh.setEnabled(false);
             loger.setEnabled(true);
-            sp.setMax(27);
+            sp.setMax(50);
             Log.d("stat= ","yes");
         }
         else{
-            Kpegas.setEnabled(true);
-            Kredaman.setEnabled(true);
-            tampilKpegas.setEnabled(true);
-            tampilKredaman.setEnabled(true);
             refresh.setEnabled(false);
             loger.setEnabled(false);
             sp.setMax(100);
@@ -571,15 +441,15 @@ public class Simulation extends AppCompatActivity {
         Calendar c = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         strDate = sdf.format(c.getTime());
+    }
 
+    public void kirimKirimData(View view){
+        Intent activityDT = new Intent(SimulasiRpm.this,Bluetooth.class);
+        startActivity(activityDT);
     }
 
     private void addEntry(){
         if(Bluetooth.isBtConnected) {
-            Kpegas.setEnabled(false);
-            Kredaman.setEnabled(false);
-            tampilKpegas.setEnabled(false);
-            tampilKredaman.setEnabled(false);
             try {
                 nilaiSp = Integer.parseInt(tampilSp.getText().toString());
             } catch (NumberFormatException e) {
@@ -589,7 +459,6 @@ public class Simulation extends AppCompatActivity {
             if(setPos <= 4){setPos = 4;}
             else if(setPos >= 31){setPos = 31;}
             konversi = (int)((100*setPos - 400)/27);
-            sim.refresh((int) konversi);
             error = nilaiSp - konversi;
             if (loger.isChecked()){
                 note(this, "Log "+strDate, "posisi = " + ambilData + " error = " + error);
@@ -597,13 +466,7 @@ public class Simulation extends AppCompatActivity {
 
         }
         else {
-            Kpegas.setEnabled(true);
-            Kredaman.setEnabled(true);
-            tampilKpegas.setEnabled(true);
-            tampilKredaman.setEnabled(true);
-            nilaiPegas = Integer.parseInt(tampilKpegas.getText().toString())/10;
 //            nilaiRedaman = Integer.parseInt(tampilKredaman.getText().toString())/10;
-            setPos = simulasi.x;
             pid();
             lastPos = setPos;
 
@@ -617,7 +480,7 @@ public class Simulation extends AppCompatActivity {
         series3.appendData(new DataPoint(x,error),true,infinity);
 
         tampilError.setText(Double.toString(error));
-        tampilPosisi.setText(""+setPos);
+        tampilRpm.setText(""+setPos);
         x++;
         if(x ==  2147483647){
             x = 0;
@@ -631,8 +494,6 @@ public class Simulation extends AppCompatActivity {
         nilaiKp = Integer.parseInt(tampilKp.getText().toString());
         nilaiKi = Integer.parseInt(tampilKi.getText().toString());
         nilaiKd = Integer.parseInt(tampilKd.getText().toString());
-        nilaiKpegas = Integer.parseInt(tampilKpegas.getText().toString());
-        nilaiKredaman = Integer.parseInt(tampilKredaman.getText().toString());
 
 //        if(Bluetooth.isBtConnected){
 //            nilaiPos = ambilData;
@@ -661,19 +522,13 @@ public class Simulation extends AppCompatActivity {
 
         Log.d("PID = ",""+nilaiPID+" redaman = "+nilaiKredaman);
 //        Log.d("x =",""+simulasi.x);
-        sim.refresh((int)(lastPID));
 //        lastPID = nilaiPID;
 //        System.out.println(lastPID+" "+P);
 
     }
 
-    public void kirimKirim(View view){
-        Intent activityDT = new Intent(Simulation.this,Bluetooth.class);
-        startActivity(activityDT);
-    }
-
     public void mulaiSimulasi(View view){
-        if(posisiBtn.isChecked()){
+        if(rpmBtn.isChecked()){
             graph.setVisibility(View.VISIBLE);
             graph2.setVisibility(View.GONE);
             graph.addSeries(series);
@@ -747,7 +602,7 @@ public class Simulation extends AppCompatActivity {
 
         view.setEnabled(false);
         stop.setEnabled(true);
-        kirim.setEnabled(false);
+        kirimData.setEnabled(false);
         refresh.setEnabled(false);
     }
 
@@ -785,10 +640,9 @@ public class Simulation extends AppCompatActivity {
 
     public void refreshing(View view){
         start.setEnabled(true);
-        x=0;
         flagSim = false;
         tampilError.setText(""+0);
-        tampilPosisi.setText(""+50);
+        tampilRpm.setText(""+50);
         try {
             if(mulaiSim.isAlive()) {
                 mulaiSim.join();
@@ -807,7 +661,6 @@ public class Simulation extends AppCompatActivity {
         series2.setColor(Color.GREEN);
         series3 = new LineGraphSeries<>();
         series3.setColor(Color.RED);
-        sim.refresh(50);
         lastPID=50;
         if (Bluetooth.isBtConnected) {
             sendData("reset\n");
@@ -822,7 +675,7 @@ public class Simulation extends AppCompatActivity {
 //                e.printStackTrace();
 //            }
         }
-        kirim.setEnabled(true);
+        kirimData.setEnabled(true);
         stop.setEnabled(false);
         refresh.setEnabled(false);
     }
@@ -872,8 +725,8 @@ public class Simulation extends AppCompatActivity {
                                                 public void run()
                                                 {
 //                                                    try {
-                                                        ambilData = Double.parseDouble(data);
-                                                        Log.d("data= ", "string= "+data+" double= "+ambilData);
+                                                    ambilData = Double.parseDouble(data);
+                                                    Log.d("data= ", "string= "+data+" double= "+ambilData);
 //                                                        Thread.sleep(500);
 //                                                    } catch (InterruptedException e) {
 //                                                        e.printStackTrace();
@@ -960,7 +813,43 @@ public class Simulation extends AppCompatActivity {
         toastCountDown.start();
     }
 
-    private class  send extends AsyncTask<Void, Void, Void>{
+    public void note(Context context, String sFileName, String sBody) {
+        try {
+//            File root = new File(Environment.getExternalStorageDirectory(), "Notes");
+            File root = new File(Environment.getExternalStorageDirectory(), "PIDRPMSimu");
+            if (!root.exists()) {
+                root.mkdirs();
+            }
+            gpxfile = new File(root, sFileName);
+            FileWriter writer = new FileWriter(gpxfile,true);
+            writer.append(sBody+"\n\n");
+            writer.flush();
+            writer.close();
+//            Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private class get extends AsyncTask<Void, Void, Void>{
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            getData();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+        }
+    }
+
+    private class  send extends AsyncTask<Void, Void, Void> {
 
         EditText tampilSp, tampilKp, tampilKi, tampilKd;
         send(EditText tampilSP, EditText tampilKP, EditText tampilKI, EditText tampilKD){
@@ -997,78 +886,10 @@ public class Simulation extends AppCompatActivity {
         }
     }
 
-    public void note(Context context, String sFileName, String sBody) {
-        try {
-//            File root = new File(Environment.getExternalStorageDirectory(), "Notes");
-            File root = new File(Environment.getExternalStorageDirectory(), "PIDSimu");
-            if (!root.exists()) {
-                root.mkdirs();
-            }
-            gpxfile = new File(root, sFileName);
-            FileWriter writer = new FileWriter(gpxfile,true);
-            writer.append(sBody+"\n\n");
-            writer.flush();
-            writer.close();
-//            Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private class get extends AsyncTask<Void, Void, Void>{
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            getData();
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-        }
-    }
-
-    public void HalamanMenu(View view){
-        SharedPreferences parameter = getSharedPreferences(PREFS_NAME,0);
-        SharedPreferences.Editor editor = parameter.edit();
-        nilaiSp = Integer.parseInt(tampilSp.getText().toString());
-        nilaiKp = Integer.parseInt(tampilKp.getText().toString());
-        nilaiKi = Integer.parseInt(tampilKi.getText().toString());
-        nilaiKd = Integer.parseInt(tampilKd.getText().toString());
-        nilaiKpegas = Integer.parseInt(tampilKpegas.getText().toString());
-        nilaiKredaman = Integer.parseInt(tampilKredaman.getText().toString());
-        editor.putInt("saveSp",nilaiSp);
-        editor.putInt("saveKp",nilaiKp);
-        editor.putInt("saveKi",nilaiKi);
-        editor.putInt("saveKd",nilaiKd);
-        editor.putInt("saveKpegas",nilaiKpegas);
-        editor.putInt("saveKredaman",nilaiKredaman);
-        editor.commit();
-        flagSim = false;
-        try {
-            mulaiSim.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        view.setEnabled(false);
-        start.setEnabled(true);
-        x=0;
-        finish();
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
         if(Bluetooth.isBtConnected){
-            Kpegas.setEnabled(false);
-            Kredaman.setEnabled(false);
-            tampilKpegas.setEnabled(false);
-            tampilKredaman.setEnabled(false);
             refresh.setEnabled(false);
             loger.setEnabled(true);
             sp.setProgress(0);
@@ -1077,10 +898,6 @@ public class Simulation extends AppCompatActivity {
             Log.d("stat= ","yes");
         }
         else{
-            Kpegas.setEnabled(true);
-            Kredaman.setEnabled(true);
-            tampilKpegas.setEnabled(true);
-            tampilKredaman.setEnabled(true);
             refresh.setEnabled(false);
             sp.setProgress(0);
             sp.setMax(100);
@@ -1097,8 +914,6 @@ public class Simulation extends AppCompatActivity {
         nilaiKp = Integer.parseInt(tampilKp.getText().toString());
         nilaiKi = Integer.parseInt(tampilKi.getText().toString());
         nilaiKd = Integer.parseInt(tampilKd.getText().toString());
-        nilaiKpegas = Integer.parseInt(tampilKpegas.getText().toString());
-        nilaiKredaman = Integer.parseInt(tampilKredaman.getText().toString());
         editor.putInt("saveSp",nilaiSp);
         editor.putInt("saveKp",nilaiKp);
         editor.putInt("saveKi",nilaiKi);
@@ -1126,4 +941,3 @@ public class Simulation extends AppCompatActivity {
         finish();
     }
 }
-

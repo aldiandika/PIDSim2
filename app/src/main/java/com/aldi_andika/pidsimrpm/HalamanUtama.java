@@ -1,10 +1,9 @@
-package com.kapak_merah.pidsim;
+package com.aldi_andika.pidsimrpm;
 
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Display;
 import android.view.View;
@@ -41,12 +40,12 @@ public class HalamanUtama extends AppCompatActivity {
     }
 
     public void simulate(View view){
-        Intent activityDT = new Intent(HalamanUtama.this,Simulation.class);
+        Intent activityDT = new Intent(HalamanUtama.this,SimulasiRpm.class);
         startActivity(activityDT);
     }
 
     public void latihanSoal(View view){
-        Intent activityDT = new Intent(HalamanUtama.this,LatihanSoal.class);
+        Intent activityDT = new Intent(HalamanUtama.this,Bluetooth.class);
         startActivity(activityDT);
     }
 

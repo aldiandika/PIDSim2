@@ -1,4 +1,4 @@
-package com.kapak_merah.pidsim;
+package com.aldi_andika.pidsimrpm;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PID Simulation</string>
+    <string name="app_name">PID RPM Simulation</string>
     <string name="judul">Kontrol Proporsional-Integral-Derivatif (PID)</string>
     <string name="konten">Kontrol PID merupakan sistem kontrol yang cukup populer digunakan di industri, diterapkan pada berbagai sistem seperti mekanik, pneumatik dan elektrik. Seiring dengan kemajuan teknologi, saat ini kontrol PID telah diimplementasikan secara digital dalam mikroprosessor.</string>
     <string name="konten2">Blok diagram kontrol PID ditampilkan pada Gambar 1, nampak sinyal error digunakan untuk membangkitkan aksi proporsional, integral dan deripatif. Sinyal kontrol PID atau u(t), nantinya akan diaplikasikan ke proses untuk memperoleh unjuk kerja yang diharapkan.</string>
@@ -22,7 +22,7 @@
     <string name="ketZN2b">Gambar 3. Proses menentukan parameter Tu</string>
     <string name="kontenZN2c"> \u0020 \u0020 Setelah parameter KpU dan Tu didapatkan, nilai-nilai Kp, Ti, dan Td dapat dihitung menggunakan rumus-rumus parameter PID untuk ZN tipe 2. Tabel 2 menunjukan tabel parameter PID untuk metode ZN tipe 2.</string>
     <string name="ketZN2c">Tabel 2. Parameter PID untuk metode ZN tipe 2</string>
-    
+
     <string name="next">NEXT</string>
     <string name="skip">SKIP</string>
     <string name="start">GOT IT</string>

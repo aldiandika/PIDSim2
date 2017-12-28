@@ -1,11 +1,10 @@
-package com.kapak_merah.pidsim;
+package com.aldi_andika.pidsimrpm;
 
 /**
  * Created by Tamu on 02/11/2016.
  */
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
@@ -20,9 +19,6 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -32,8 +28,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 public class bububu extends Activity
 {
     //widgets

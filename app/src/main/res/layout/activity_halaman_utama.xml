@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.kapak_merah.pidsim.HalamanUtama">
+    tools:context="com.aldi_andika.pidsimrpm.HalamanUtama">
 
     <LinearLayout
         android:layout_width="match_parent"

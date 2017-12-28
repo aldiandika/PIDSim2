@@ -1,15 +1,12 @@
-package com.kapak_merah.pidsim;
+package com.aldi_andika.pidsimrpm;
 
 import android.database.Cursor;
 import android.database.SQLException;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;

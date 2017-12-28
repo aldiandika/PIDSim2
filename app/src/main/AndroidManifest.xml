@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.kapak_merah.pidsim">
+    package="com.aldi_andika.pidsimrpm">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -14,61 +14,70 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".WelcomeActivity"
+            android:name="com.aldi_andika.pidsimrpm.WelcomeActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".HalamanUtama"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
-            android:screenOrientation="portrait">
-
-        </activity>
+            android:name="com.aldi_andika.pidsimrpm.HalamanUtama"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"></activity>
         <activity
-            android:name=".Teori"
+            android:name="com.aldi_andika.pidsimrpm.Teori"
             android:label="Theory"
-            android:theme="@android:style/Theme.Holo.Light.DarkActionBar"
-            android:parentActivityName=".HalamanUtama">
+            android:parentActivityName="com.aldi_andika.pidsimrpm.HalamanUtama"
+            android:theme="@android:style/Theme.Holo.Light.DarkActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".HalamanUtama" />
+                android:value="com.aldi_andika.pidsimrpm.HalamanUtama" />
         </activity>
         <activity
-            android:name=".LatihanSoal"
+            android:name="com.aldi_andika.pidsimrpm.LatihanSoal"
             android:label="Quiz"
-            android:parentActivityName=".HalamanUtama">
+            android:parentActivityName="com.aldi_andika.pidsimrpm.HalamanUtama">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".HalamanUtama" />
+                android:value="com.aldi_andika.pidsimrpm.HalamanUtama" />
         </activity>
         <activity
-            android:name=".Simulation"
+            android:name="com.aldi_andika.pidsimrpm.Simulation"
             android:label="Simulation"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
-            android:parentActivityName=".HalamanUtama">
+            android:parentActivityName="com.aldi_andika.pidsimrpm.HalamanUtama"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".HalamanUtama" />
+                android:value="com.aldi_andika.pidsimrpm.HalamanUtama" />
         </activity>
         <activity
-            android:name=".Bluetooth"
+            android:name="com.aldi_andika.pidsimrpm.Bluetooth"
             android:label="Connect to Bluetooth"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
-            android:parentActivityName=".Simulation">
+            android:parentActivityName="com.aldi_andika.pidsimrpm.SimulasiRpm"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".Simulation" />
+                android:value="com.aldi_andika.pidsimrpm.SimulasiRpm" />
         </activity>
-        <activity android:name=".About"
+        <activity
+            android:name="com.aldi_andika.pidsimrpm.About"
             android:label="About"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
-            android:parentActivityName=".HalamanUtama">
+            android:parentActivityName="com.aldi_andika.pidsimrpm.HalamanUtama"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".HalamanUtama" />
+                android:value="com.aldi_andika.pidsimrpm.HalamanUtama" />
+        </activity>
+        <activity
+            android:name="com.aldi_andika.pidsimrpm.SimulasiRpm"
+            android:label="Simulasi"
+            android:parentActivityName="com.aldi_andika.pidsimrpm.HalamanUtama"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.aldi_andika.pidsimrpm.HalamanUtama" />
         </activity>
     </application>
 

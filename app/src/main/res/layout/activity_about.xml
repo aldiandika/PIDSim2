@@ -10,7 +10,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:background="@drawable/latar_latar"
-    tools:context="com.kapak_merah.pidsim.About">
+    tools:context="com.aldi_andika.pidsimrpm.About">
 
     <ImageView
         android:layout_width="200dp"
