@@ -53,14 +53,14 @@
                 android:id="@+id/l">
 
                 <TextView
-                    android:layout_width="48dp"
+                    android:layout_width="52dp"
                     android:layout_height="32dp"
                     android:id="@+id/error"
                     android:text="0"
-                    android:textSize="19sp"
+                    android:textSize="12sp"
                     android:textColor="#000000"
                     android:layout_marginLeft="16dp"
-                    android:maxLength="3"
+                    android:maxLength="5"
                     android:maxLines="1"
                     android:background="@drawable/border"
                     android:gravity="center"/>
@@ -110,12 +110,16 @@
 
 
                 <TextView
-                    android:layout_width="48dp"
+                    android:layout_width="52dp"
                     android:layout_height="32dp"
-                    android:text="50"
+                    android:paddingLeft="2dp"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    android:paddingRight="2dp"
+                    android:text="0"
                     android:id="@+id/txt_rpm"
-                    android:textSize="19sp"
-                    android:maxLength="3"
+                    android:textSize="12sp"
+                    android:maxLength="5"
                     android:maxLines="1"
                     android:textColor="#000000"
                     android:background="@drawable/border"
@@ -127,6 +131,21 @@
 
 
             </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:background="@drawable/trace_bg">
+
+                <ImageView
+                    android:id="@+id/wheel"
+                    android:src="@drawable/new_roda"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="25dp"
+                    android:foregroundGravity="center"/>
+
+            </RelativeLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -151,6 +170,7 @@
                     android:layout_height="48dp"
                     android:src="@drawable/stop_dis"
                     android:id="@+id/stop"
+                    android:onClick="stopSimulasi"
                     android:layout_marginRight="8dp"
                     android:layout_marginEnd="8dp"
                     android:layout_gravity="center_horizontal"
@@ -166,7 +186,8 @@
                     android:layout_marginEnd="8dp"
                     android:layout_gravity="center_horizontal"
                     android:padding="0dp"
-                    android:scaleType="fitCenter"/>
+                    android:scaleType="fitCenter"
+                    android:onClick="refreshing"/>
 
                 <ToggleButton
                     android:layout_width="48dp"
@@ -193,21 +214,6 @@
 
 
             </LinearLayout>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="250dp"
-                android:background="@drawable/trace_bg">
-
-                <ImageView
-                    android:id="@+id/wheel"
-                    android:src="@drawable/trace_wheel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="25dp"
-                    android:foregroundGravity="center"/>
-
-            </RelativeLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"

@@ -605,7 +605,7 @@ public class Simulation extends AppCompatActivity {
             lastPos = setPos;
 
         }
-//        setPos = objSim.getProgress();
+//        setRpm = objSim.getProgress();
 
         if(setPos >= 100){setPos = 100;}
         if(setPos <= 0){setPos = 0;}

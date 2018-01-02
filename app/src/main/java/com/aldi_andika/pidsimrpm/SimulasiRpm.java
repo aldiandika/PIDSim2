@@ -17,6 +17,9 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -37,6 +40,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -45,15 +49,17 @@ public class SimulasiRpm extends AppCompatActivity {
     public static BluetoothAdapter mBluetooth = null;
     public static double nilaiRedaman;
     public int nilaiSp,nilaiKp,nilaiKi,nilaiKd,nilaiKpegas,nilaiKredaman,
-            posSp,posKp,posKi,posKd,posKpegas,posKredaman,konversi;
-    public static double lastError,error,setPos,lastPos,nilaiPos,ambilData;
-    public static double P,D,I,nilaiPID = 0,lastPID=50,posisi;
+            posSp,posKp,posKi,posKd,konversi;
+    public static double lastError,error, setRpm, lastRpm,nilaiPos,ambilData;
+    public static double P,D,I,nilaiPID = 0,lastPID=0,posisi;
     public int infinity = Integer.MAX_VALUE;
     public double x=0,itung,clearToSend,tampong;
     public boolean flagSim=false, flagProgress=false;
-    public String PREFS_NAME = "simpanan",strDate;
+    public String PREFS_NAME = "simpanSementara",strDate;
     public LineGraphSeries<DataPoint> series,series2,series3;
 
+    DecimalFormat df;
+    RotateAnimation r;
     SeekBar sp,Kp,Ki,Kd;
     RadioGroup toggle;
     RadioButton errorBtn,rpmBtn;
@@ -61,7 +67,7 @@ public class SimulasiRpm extends AppCompatActivity {
     TextView tampilError,tampilRpm;
     GraphView graph,graph2;
     ImageButton start,stop,refresh,kirimData;
-    Thread mulaiSim;
+    Thread mulaiSim, mulaiAnim;
     InputStream mmInputStream;
     ToggleButton loger;
     ImageView wheel;
@@ -72,7 +78,8 @@ public class SimulasiRpm extends AppCompatActivity {
     File gpxfile;
     int jancuk=0;
     private Toast mToastToShow;
-    public static double nilaiPegas;
+    public int  startDegree=-1, endDegree=0;
+    public double putaran, rpm, speed = 0.0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +90,8 @@ public class SimulasiRpm extends AppCompatActivity {
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        df = new DecimalFormat("#.00");
 
         wheel = (ImageView) findViewById(R.id.wheel);
 
@@ -154,25 +163,8 @@ public class SimulasiRpm extends AppCompatActivity {
                                           boolean fromUser) {
                 // TODO Auto-generated method stub
 //                double tampong;
-                if (fromUser) {
-                    flagProgress = false;
-
-                }
-                if(Bluetooth.isBtConnected){
-
-                    tampong = 4+ (progress *1);
-                    Log.d("seek = ","p="+progress);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            tampilSp.setText(String.valueOf((int) tampong));
-                        }
-                    });
-
-                }
-                else {
-                    tampilSp.setText(String.valueOf(progress));
-                }
+                tampilSp.setText(String.valueOf(progress));
+                speed = 1.7*progress;
 //                Toast.makeText(Simulation.this, ""+posSp, Toast.LENGTH_SHORT).show();
             }
 
@@ -184,10 +176,7 @@ public class SimulasiRpm extends AppCompatActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 // TODO Auto-generated method stub
-                flagProgress=true;
-                jancuk=0;
-                Log.d("pelag","stoptouch beibeh");
-                if (Bluetooth.isBtConnected && (!start.isEnabled())) {
+                if(Bluetooth.isBtConnected && (!start.isEnabled())){
                     new send(tampilSp, tampilKp, tampilKi, tampilKd).execute();
                 }
             }
@@ -275,39 +264,14 @@ public class SimulasiRpm extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (!Bluetooth.isBtConnected) {
-                    if((tampilSp.getText().toString()).matches("")){
-                        sp.setProgress(0);
-                    }else {
-                        nilaiSp = Integer.parseInt(tampilSp.getText().toString());
-                        sp.setProgress(nilaiSp);
-                    }
-                    tampilSp.setSelection(tampilSp.getText().length());
-                } else {
-                    if((tampilSp.getText().toString()).matches("")){
-                        sp.setProgress(0);
-                    }else {
-                        nilaiSp = Integer.parseInt(tampilSp.getText().toString());
-//                        if (nilaiSp < 4){
-//                            nilaiSp =4;
-//                        }else if(nilaiSp>31){
-//                            nilaiSp=31;
-//                        }
-                        Log.d("pelag =","f="+flagProgress+" jancuk="+jancuk);
-                        if (!flagProgress) {
-                            sp.setProgress((int)tampong-4);
-                        } else {
-                            if (jancuk==0) {
-                                jancuk++;
-                                sp.setProgress(nilaiSp);
-
-                            } else{
-                                sp.setProgress(nilaiSp-4);
-                            }
-                        }
-                    }
-                    tampilSp.setSelection(tampilSp.getText().length());
+                if((tampilSp.getText().toString()).matches("")){
+                    sp.setProgress(0);
+                }else {
+                    nilaiSp = Integer.parseInt(tampilSp.getText().toString());
+                    sp.setProgress(nilaiSp);
                 }
+                tampilSp.setSelection(tampilSp.getText().length());
+                speed = 1.7*nilaiSp;
             }
         });
         tampilKp.addTextChangedListener(new TextWatcher() {
@@ -377,6 +341,8 @@ public class SimulasiRpm extends AppCompatActivity {
             }
         });
 
+//        speed = 1.7*nilaiSp;
+
         graph = (GraphView)findViewById(R.id.graf);
         graph2 = (GraphView)findViewById(R.id.graf2);
         series = new LineGraphSeries<>();
@@ -426,10 +392,34 @@ public class SimulasiRpm extends AppCompatActivity {
             }
         });
 
+        errorBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    graph2.setVisibility(View.VISIBLE);
+                    graph.setVisibility(View.GONE);
+                    graph2.addSeries(series3);
+                    graph2.getGridLabelRenderer().setNumHorizontalLabels(11);
+                    graph2.getGridLabelRenderer().setNumVerticalLabels(11);
+                    graph2.getGridLabelRenderer().setHorizontalAxisTitle("Waktu(s)");
+                    graph2.getGridLabelRenderer().setVerticalAxisTitle("RPM(rad/m)");
+                    graph2.getGridLabelRenderer().setLabelVerticalWidth(75);
+                    graph2.getGridLabelRenderer().setLabelsSpace(5);
+                    Viewport viewport = graph2.getViewport();
+                    viewport.setXAxisBoundsManual(true);
+                    viewport.setMinX(0);
+                    viewport.setMaxX(100);
+                    viewport.setScalable(true);
+                    viewport.setScrollableY(true);
+                    viewport.setScrollable(true);
+                }
+            }
+        });
+
         if(Bluetooth.isBtConnected){
             refresh.setEnabled(false);
             loger.setEnabled(true);
-            sp.setMax(50);
+            sp.setMax(100);
             Log.d("stat= ","yes");
         }
         else{
@@ -455,34 +445,39 @@ public class SimulasiRpm extends AppCompatActivity {
             } catch (NumberFormatException e) {
                 e.printStackTrace();
             }
-            setPos = ambilData;
-            if(setPos <= 4){setPos = 4;}
-            else if(setPos >= 31){setPos = 31;}
-            konversi = (int)((100*setPos - 400)/27);
-            error = nilaiSp - konversi;
+            setRpm = ambilData;
+            animasiOnline();
+            error = nilaiSp - setRpm;
             if (loger.isChecked()){
                 note(this, "Log "+strDate, "posisi = " + ambilData + " error = " + error);
             }
 
         }
         else {
-//            nilaiRedaman = Integer.parseInt(tampilKredaman.getText().toString())/10;
             pid();
-            lastPos = setPos;
-
+            setRpm = Double.parseDouble(df.format(rpm));
         }
-//        setPos = objSim.getProgress();
 
-        if(setPos >= 100){setPos = 100;}
-        if(setPos <= 0){setPos = 0;}
-        series.appendData(new DataPoint(x,setPos),true,infinity);
-        series2.appendData(new DataPoint(x,nilaiSp),true,infinity);
-        series3.appendData(new DataPoint(x,error),true,infinity);
+        if(setRpm >= 100){setRpm = 100;}
+        if(setRpm <= 0){setRpm = 0;}
+
+//        error = Double.parseDouble(df.format(error));
+        if(x <= 100){
+            series.appendData(new DataPoint(x, setRpm),false,infinity);
+            series2.appendData(new DataPoint(x,nilaiSp),false,infinity);
+            series3.appendData(new DataPoint(x,error),false,infinity);
+        }else{
+            series.appendData(new DataPoint(x, setRpm),true,infinity);
+            series2.appendData(new DataPoint(x,nilaiSp),true,infinity);
+            series3.appendData(new DataPoint(x,error),true,infinity);
+        }
 
         tampilError.setText(Double.toString(error));
-        tampilRpm.setText(""+setPos);
+        tampilRpm.setText(""+ setRpm);
+
+        Log.d("x",""+x);
         x++;
-        if(x ==  2147483647){
+        if(x ==  Integer.MAX_VALUE){
             x = 0;
         }
 
@@ -495,36 +490,50 @@ public class SimulasiRpm extends AppCompatActivity {
         nilaiKi = Integer.parseInt(tampilKi.getText().toString());
         nilaiKd = Integer.parseInt(tampilKd.getText().toString());
 
-//        if(Bluetooth.isBtConnected){
-//            nilaiPos = ambilData;
-//        }
-//        else{nilaiPos = simulasi.x;}
-//        error = nilaiSp - ((sim.x*100)/sim.getMeasuredWidth());
-        error = nilaiSp - simulasi.x;
+        error = nilaiSp - rpm;
 
-        P = (nilaiKp* error)/200;
+        P = (nilaiKp* error)/100;
 
-        D = ((nilaiKd*(error - lastError)/200) );
+        D = ((nilaiKd*(error - lastError))/100);
 
-        I = ((nilaiKi*(error + lastError))/200);
+        I = ((nilaiKi*(error + lastError))/100);
         lastError = error;
 
-        Log.d("P =",""+P);
-        if(nilaiPID >= 100){nilaiPID = 100;}
-        if(nilaiPID <= 0){nilaiPID = 0;}
+        nilaiPID = (P + I + D);
+//        if(nilaiPID >= 100){nilaiPID = 100;}
+//        if(nilaiPID <= 0){nilaiPID = 0;}
 
-        if(setPos > lastPos){nilaiRedaman = (double) (-1*nilaiKredaman)/50;}
-        else if(setPos < lastPos){nilaiRedaman = (double) nilaiKredaman/50;}
-        else{nilaiRedaman = 0;}
-        nilaiPID = (P + I + D) + nilaiRedaman;
+        Log.d("P",""+P);
+        Log.d("error",""+error);
+        Log.d("pid",""+lastPID);
+        Log.d("rpm",""+rpm);
+        Log.d("prifat",""+nilaiPID);
 
+        speed =lastPID;
         lastPID = lastPID + nilaiPID;
 
-        Log.d("PID = ",""+nilaiPID+" redaman = "+nilaiKredaman);
-//        Log.d("x =",""+simulasi.x);
-//        lastPID = nilaiPID;
-//        System.out.println(lastPID+" "+P);
+//        animasiOffline();
+    }
 
+    public void animasiOffline(){
+        startDegree += speed;
+        endDegree += speed;
+        r = new RotateAnimation(startDegree, endDegree,
+                Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        r.setRepeatCount(0);
+        wheel.startAnimation(r);
+        putaran = endDegree/360;
+        rpm = speed/3.6;
+
+        rpm = Double.parseDouble(df.format(rpm));
+    }
+
+    public void animasiOnline(){
+        r = new RotateAnimation(0, (float)setRpm*360,Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        r.setDuration((long) 1000*60);
+        r.setRepeatCount(Animation.INFINITE);
+        r.setInterpolator(new LinearInterpolator());
+        wheel.startAnimation(r);
     }
 
     public void mulaiSimulasi(View view){
@@ -582,29 +591,60 @@ public class SimulasiRpm extends AppCompatActivity {
 //
 ////                                new get().execute();
 //                            }
+                            //addEntry();
+//                            pid();
                             addEntry();
-
                         }
                     });
 
                     // sleep to slow down the add of entries
                     try {
-                        Thread.sleep(200);
+                        Thread.sleep(200);//5
                     } catch (InterruptedException e) {
                         // manage error ...
                     }
-
-
                 }
             }
         });
         mulaiSim.start();
+
+        mulaiAnim = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(flagSim && !Bluetooth.isBtConnected){
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+//                            if(Bluetooth.isBtConnected){
+//
+////                                new send(tampilSp, tampilKp, tampilKi, tampilKd).execute();
+//
+////                                new get().execute();
+//                            }
+                            //addEntry();
+//                            pid();
+                            animasiOffline();
+                        }
+                    });
+
+                    // sleep to slow down
+                    try {
+                        Thread.sleep(10);//5
+                    } catch (InterruptedException e) {
+                        // manage error ...
+                    }
+                }
+            }
+        });
+        mulaiAnim.start();
 
         view.setEnabled(false);
         stop.setEnabled(true);
         kirimData.setEnabled(false);
         refresh.setEnabled(false);
     }
+
+
 
     public void stopSimulasi(View view){
         flagSim = false;
@@ -632,6 +672,14 @@ public class SimulasiRpm extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        try {
+            if(mulaiAnim.isAlive()) {
+                mulaiAnim.join();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         view.setEnabled(false);
         start.setEnabled(true);
         stop.setEnabled(false);
@@ -642,10 +690,18 @@ public class SimulasiRpm extends AppCompatActivity {
         start.setEnabled(true);
         flagSim = false;
         tampilError.setText(""+0);
-        tampilRpm.setText(""+50);
+        tampilRpm.setText(""+0);
         try {
             if(mulaiSim.isAlive()) {
                 mulaiSim.join();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            if(mulaiAnim.isAlive()) {
+                mulaiAnim.join();
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -661,7 +717,9 @@ public class SimulasiRpm extends AppCompatActivity {
         series2.setColor(Color.GREEN);
         series3 = new LineGraphSeries<>();
         series3.setColor(Color.RED);
-        lastPID=50;
+        x=0;
+        rpm=0;
+        lastPID=0;
         if (Bluetooth.isBtConnected) {
             sendData("reset\n");
             stop.setEnabled(false);
@@ -892,15 +950,11 @@ public class SimulasiRpm extends AppCompatActivity {
         if(Bluetooth.isBtConnected){
             refresh.setEnabled(false);
             loger.setEnabled(true);
-            sp.setProgress(0);
-            sp.setMax(27);
             tampilSp.setFilters(new InputFilter[]{new InputFilter.LengthFilter(2){}});
             Log.d("stat= ","yes");
         }
         else{
             refresh.setEnabled(false);
-            sp.setProgress(0);
-            sp.setMax(100);
             tampilSp.setFilters(new InputFilter[]{new InputFilter.LengthFilter(3){}});
         }
     }
@@ -918,8 +972,46 @@ public class SimulasiRpm extends AppCompatActivity {
         editor.putInt("saveKp",nilaiKp);
         editor.putInt("saveKi",nilaiKi);
         editor.putInt("saveKd",nilaiKd);
-        editor.putInt("saveKpegas",nilaiKpegas);
-        editor.putInt("saveKredaman",nilaiKredaman);
+        editor.commit();
+        flagSim = false;
+        try {
+            if(mulaiSim.isAlive()) {
+                mulaiSim.join();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+//        try {
+//            if(mulaiAnim.isAlive()) {
+//                mulaiAnim.join();
+//            }
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+        x=0;
+
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if(bluetoothAdapter.isEnabled())
+        {
+            Disconnect();
+            bluetoothAdapter.disable();
+            msg("Bluetooth Disable");
+        }
+        finish();
+    }
+
+    public void HalamanMenu(View view){
+        SharedPreferences parameter = getSharedPreferences(PREFS_NAME,0);
+        SharedPreferences.Editor editor = parameter.edit();
+        nilaiSp = Integer.parseInt(tampilSp.getText().toString());
+        nilaiKp = Integer.parseInt(tampilKp.getText().toString());
+        nilaiKi = Integer.parseInt(tampilKi.getText().toString());
+        nilaiKd = Integer.parseInt(tampilKd.getText().toString());
+        editor.putInt("saveSp",nilaiSp);
+        editor.putInt("saveKp",nilaiKp);
+        editor.putInt("saveKi",nilaiKi);
+        editor.putInt("saveKd",nilaiKd);
         editor.commit();
         flagSim = false;
         try {
@@ -927,10 +1019,13 @@ public class SimulasiRpm extends AppCompatActivity {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        try {
+            mulaiAnim.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        start.setEnabled(true);
         x=0;
-
-//        Bluetooth.myBluetooth.disable();
-//        msg("Bluetooth Disable");
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if(bluetoothAdapter.isEnabled())
         {
