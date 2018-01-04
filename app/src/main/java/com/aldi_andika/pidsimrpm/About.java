@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 public class About extends AppCompatActivity {
 
+    View decorView;
     Button help;
     TextView textView3;
     public static boolean intro = false;
@@ -20,6 +21,7 @@ public class About extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
+        decorView = getWindow().getDecorView();
 
         help = (Button)findViewById(R.id.help);
         textView3 = (TextView) findViewById(R.id.textView3);
@@ -49,5 +51,18 @@ public class About extends AppCompatActivity {
         } catch (android.content.ActivityNotFoundException ex) {
             Toast.makeText(About.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
         }
+    }
+
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            decorView.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);}
     }
 }

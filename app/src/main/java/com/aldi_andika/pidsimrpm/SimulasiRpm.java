@@ -17,6 +17,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
@@ -58,6 +59,7 @@ public class SimulasiRpm extends AppCompatActivity {
     public String PREFS_NAME = "simpanSementara",strDate;
     public LineGraphSeries<DataPoint> series,series2,series3;
 
+    View decorView;
     DecimalFormat df;
     RotateAnimation r;
     SeekBar sp,Kp,Ki,Kd;
@@ -79,13 +81,14 @@ public class SimulasiRpm extends AppCompatActivity {
     int jancuk=0;
     private Toast mToastToShow;
     public int  startDegree=-1, endDegree=0;
-    public double putaran, rpm, speed = 0.0;
+    public double Arpm, rpm, speed = 0.0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         overridePendingTransition(R.anim.fadein, R.anim.fadeout);
         setContentView(R.layout.activity_simulasi_rpm);
+        decorView = getWindow().getDecorView();
 
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
@@ -341,6 +344,7 @@ public class SimulasiRpm extends AppCompatActivity {
             }
         });
 
+        sp.setMax(120);
 //        speed = 1.7*nilaiSp;
 
         graph = (GraphView)findViewById(R.id.graf);
@@ -419,18 +423,23 @@ public class SimulasiRpm extends AppCompatActivity {
         if(Bluetooth.isBtConnected){
             refresh.setEnabled(false);
             loger.setEnabled(true);
-            sp.setMax(100);
             Log.d("stat= ","yes");
         }
         else{
             refresh.setEnabled(false);
             loger.setEnabled(false);
-            sp.setMax(100);
+
         }
 
         Calendar c = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         strDate = sdf.format(c.getTime());
+
+        r = new RotateAnimation(0, 360,
+                Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        r.setRepeatCount(Animation.INFINITE);
+        r.setInterpolator(new LinearInterpolator());
+
     }
 
     public void kirimKirimData(View view){
@@ -446,7 +455,6 @@ public class SimulasiRpm extends AppCompatActivity {
                 e.printStackTrace();
             }
             setRpm = ambilData;
-            animasiOnline();
             error = nilaiSp - setRpm;
             if (loger.isChecked()){
                 note(this, "Log "+strDate, "posisi = " + ambilData + " error = " + error);
@@ -458,7 +466,7 @@ public class SimulasiRpm extends AppCompatActivity {
             setRpm = Double.parseDouble(df.format(rpm));
         }
 
-        if(setRpm >= 100){setRpm = 100;}
+        if(setRpm >= 120){setRpm = 120;}
         if(setRpm <= 0){setRpm = 0;}
 
 //        error = Double.parseDouble(df.format(error));
@@ -506,36 +514,44 @@ public class SimulasiRpm extends AppCompatActivity {
         Log.d("P",""+P);
         Log.d("error",""+error);
         Log.d("pid",""+lastPID);
-        Log.d("rpm",""+rpm);
         Log.d("prifat",""+nilaiPID);
 
         speed =lastPID;
-        lastPID = lastPID + nilaiPID;
-
-//        animasiOffline();
-    }
-
-    public void animasiOffline(){
-        startDegree += speed;
-        endDegree += speed;
-        r = new RotateAnimation(startDegree, endDegree,
-                Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-        r.setRepeatCount(0);
-        wheel.startAnimation(r);
-        putaran = endDegree/360;
         rpm = speed/3.6;
 
         rpm = Double.parseDouble(df.format(rpm));
+        lastPID = lastPID + nilaiPID;
     }
 
-    public void animasiOnline(){
-        r = new RotateAnimation(0, (float)setRpm*360,Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-        r.setDuration((long) 1000*60);
-        r.setRepeatCount(Animation.INFINITE);
-        r.setInterpolator(new LinearInterpolator());
-        wheel.startAnimation(r);
-    }
+    public void animasiA (){
+        if(flagSim){
+            tampilRpm.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    Arpm = Double.parseDouble(tampilRpm.getText().toString());
+                    r.setDuration((long)(1000*60/Arpm));
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    r.setDuration((long)(1000*60/Arpm));
+                }
+            });
+
+            wheel.startAnimation(r);
+
+        }
+        else{
+            r.cancel();
+            r.reset();
+        }
+
+    }
     public void mulaiSimulasi(View view){
         if(rpmBtn.isChecked()){
             graph.setVisibility(View.VISIBLE);
@@ -594,6 +610,7 @@ public class SimulasiRpm extends AppCompatActivity {
                             //addEntry();
 //                            pid();
                             addEntry();
+
                         }
                     });
 
@@ -608,35 +625,38 @@ public class SimulasiRpm extends AppCompatActivity {
         });
         mulaiSim.start();
 
-        mulaiAnim = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while(flagSim && !Bluetooth.isBtConnected){
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-//                            if(Bluetooth.isBtConnected){
-//
-////                                new send(tampilSp, tampilKp, tampilKi, tampilKd).execute();
-//
-////                                new get().execute();
-//                            }
-                            //addEntry();
-//                            pid();
-                            animasiOffline();
-                        }
-                    });
+        animasiA();
 
-                    // sleep to slow down
-                    try {
-                        Thread.sleep(10);//5
-                    } catch (InterruptedException e) {
-                        // manage error ...
-                    }
-                }
-            }
-        });
-        mulaiAnim.start();
+
+//        mulaiAnim = new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                while(flagSim && !Bluetooth.isBtConnected){
+//                    runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+////                            if(Bluetooth.isBtConnected){
+////
+//////                                new send(tampilSp, tampilKp, tampilKi, tampilKd).execute();
+////
+//////                                new get().execute();
+////                            }
+//                            //addEntry();
+////                            pid();
+//                            animasiOffline();
+//                        }
+//                    });
+//
+//                    // sleep to slow down
+//                    try {
+//                        Thread.sleep(10);//5
+//                    } catch (InterruptedException e) {
+//                        // manage error ...
+//                    }
+//                }
+//            }
+//        });
+//        mulaiAnim.start();
 
         view.setEnabled(false);
         stop.setEnabled(true);
@@ -672,13 +692,7 @@ public class SimulasiRpm extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        try {
-            if(mulaiAnim.isAlive()) {
-                mulaiAnim.join();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        animasiA();
 
         view.setEnabled(false);
         start.setEnabled(true);
@@ -699,13 +713,6 @@ public class SimulasiRpm extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        try {
-            if(mulaiAnim.isAlive()) {
-                mulaiAnim.join();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         graph.removeAllSeries();
         graph2.removeAllSeries();
         graph = new GraphView(this);
@@ -784,7 +791,7 @@ public class SimulasiRpm extends AppCompatActivity {
                                                 {
 //                                                    try {
                                                     ambilData = Double.parseDouble(data);
-                                                    Log.d("data= ", "string= "+data+" double= "+ambilData);
+                                                    Log.d("Ambil", ""+ambilData);
 //                                                        Thread.sleep(500);
 //                                                    } catch (InterruptedException e) {
 //                                                        e.printStackTrace();
@@ -950,8 +957,8 @@ public class SimulasiRpm extends AppCompatActivity {
         if(Bluetooth.isBtConnected){
             refresh.setEnabled(false);
             loger.setEnabled(true);
-            tampilSp.setFilters(new InputFilter[]{new InputFilter.LengthFilter(2){}});
-            Log.d("stat= ","yes");
+            tampilSp.setFilters(new InputFilter[]{new InputFilter.LengthFilter(3){}});
+//            Log.d("stat= ","yes");
         }
         else{
             refresh.setEnabled(false);
@@ -982,13 +989,8 @@ public class SimulasiRpm extends AppCompatActivity {
             e.printStackTrace();
         }
 
-//        try {
-//            if(mulaiAnim.isAlive()) {
-//                mulaiAnim.join();
-//            }
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+        animasiA();
+
         x=0;
 
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -1019,11 +1021,8 @@ public class SimulasiRpm extends AppCompatActivity {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        try {
-            mulaiAnim.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        animasiA();
+
         start.setEnabled(true);
         x=0;
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -1034,5 +1033,17 @@ public class SimulasiRpm extends AppCompatActivity {
             msg("Bluetooth Disable");
         }
         finish();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            decorView.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);}
     }
 }

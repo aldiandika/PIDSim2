@@ -72,7 +72,7 @@
         </activity>
         <activity
             android:name="com.aldi_andika.pidsimrpm.SimulasiRpm"
-            android:label="Simulasi"
+            android:label="Simulation"
             android:parentActivityName="com.aldi_andika.pidsimrpm.HalamanUtama"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
             <meta-data

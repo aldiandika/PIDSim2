@@ -10,6 +10,7 @@ import android.view.View;
 public class Teori extends FragmentActivity implements ActionBar.TabListener
 {
 
+    View decorView;
     private ViewPager viewPager;
     private TabsPagerAdapter mAdapter;
     private ActionBar actionBar;
@@ -21,6 +22,7 @@ public class Teori extends FragmentActivity implements ActionBar.TabListener
         super.onCreate(savedInstanceState);
         overridePendingTransition(R.anim.fadein, R.anim.fadeout);
         setContentView(R.layout.activity_teoripage);
+        decorView = getWindow().getDecorView();
 
         viewPager = (ViewPager) findViewById(R.id.view_pager);
 
@@ -76,5 +78,17 @@ public class Teori extends FragmentActivity implements ActionBar.TabListener
     @Override
     public void onTabReselected(ActionBar.Tab tab, android.app.FragmentTransaction ft) {
 
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            decorView.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);}
     }
 }
