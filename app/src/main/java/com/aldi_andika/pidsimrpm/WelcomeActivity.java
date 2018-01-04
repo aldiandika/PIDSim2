@@ -72,7 +72,6 @@ public class WelcomeActivity extends AppCompatActivity {
                 R.layout.welcome_slide3,
                 R.layout.welcome_slide4,
                 R.layout.welcome_slide5,
-                R.layout.welcome_slide6,
                 R.layout.welcome_slide7,
                 R.layout.welcome_slide8,
                 R.layout.welcome_slide9};

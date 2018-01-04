@@ -3,8 +3,10 @@
     <item android:state_pressed="true">
         <shape android:shape = "rectangle">
             <corners
-                android:topLeftRadius="45dp"
-                android:bottomRightRadius="45dp"
+                android:topLeftRadius="32dp"
+                android:topRightRadius="32dp"
+                android:bottomRightRadius="32dp"
+                android:bottomLeftRadius="32dp"
                 />
             <solid android:color="#FAFF9E"/>
         </shape>
@@ -13,8 +15,11 @@
     <item>
         <shape android:shape = "rectangle">
             <corners
-                android:topLeftRadius="45dp"
-                android:bottomRightRadius="45dp"/>
+                android:topLeftRadius="16dp"
+                android:topRightRadius="16dp"
+                android:bottomRightRadius="16dp"
+                android:bottomLeftRadius="16dp"
+                />
             <solid android:color="#808080"/>
         </shape>
     </item>
