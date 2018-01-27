@@ -15,6 +15,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name="com.aldi_andika.pidsimrpm.WelcomeActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,12 +26,15 @@
         <activity
             android:name="com.aldi_andika.pidsimrpm.HalamanUtama"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"></activity>
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+
+        </activity>
         <activity
             android:name="com.aldi_andika.pidsimrpm.Teori"
             android:label="Theory"
             android:parentActivityName="com.aldi_andika.pidsimrpm.HalamanUtama"
-            android:theme="@android:style/Theme.Holo.Light.DarkActionBar">
+            android:theme="@android:style/Theme.Holo.Light.DarkActionBar"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.aldi_andika.pidsimrpm.HalamanUtama" />
@@ -38,16 +42,8 @@
         <activity
             android:name="com.aldi_andika.pidsimrpm.LatihanSoal"
             android:label="Quiz"
-            android:parentActivityName="com.aldi_andika.pidsimrpm.HalamanUtama">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.aldi_andika.pidsimrpm.HalamanUtama" />
-        </activity>
-        <activity
-            android:name="com.aldi_andika.pidsimrpm.Simulation"
-            android:label="Simulation"
             android:parentActivityName="com.aldi_andika.pidsimrpm.HalamanUtama"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.aldi_andika.pidsimrpm.HalamanUtama" />
@@ -56,7 +52,8 @@
             android:name="com.aldi_andika.pidsimrpm.Bluetooth"
             android:label="Connect to Bluetooth"
             android:parentActivityName="com.aldi_andika.pidsimrpm.SimulasiRpm"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.aldi_andika.pidsimrpm.SimulasiRpm" />
@@ -65,7 +62,8 @@
             android:name="com.aldi_andika.pidsimrpm.About"
             android:label="About"
             android:parentActivityName="com.aldi_andika.pidsimrpm.HalamanUtama"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.aldi_andika.pidsimrpm.HalamanUtama" />
@@ -74,7 +72,8 @@
             android:name="com.aldi_andika.pidsimrpm.SimulasiRpm"
             android:label="Simulation"
             android:parentActivityName="com.aldi_andika.pidsimrpm.HalamanUtama"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+            android:theme="@style/AppTheme"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.aldi_andika.pidsimrpm.HalamanUtama" />

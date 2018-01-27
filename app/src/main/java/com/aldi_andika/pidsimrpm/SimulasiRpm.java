@@ -15,6 +15,7 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
@@ -31,6 +32,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+import android.widget.Toolbar;
 
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.Viewport;
@@ -51,9 +53,9 @@ public class SimulasiRpm extends AppCompatActivity {
     public static double nilaiRedaman;
     public int nilaiSp,nilaiKp,nilaiKi,nilaiKd,nilaiKpegas,nilaiKredaman,
             posSp,posKp,posKi,posKd,konversi;
-    public static double lastError,error, setRpm, lastRpm,nilaiPos,ambilData;
+    public static double lastError,error, lastRpm,nilaiPos,ambilData;
     public static double P,D,I,nilaiPID = 0,lastPID=0,posisi;
-    public int infinity = Integer.MAX_VALUE;
+    public int infinity = Integer.MAX_VALUE, setRpm;
     public double x=0,itung,clearToSend,tampong;
     public boolean flagSim=false, flagProgress=false;
     public String PREFS_NAME = "simpanSementara",strDate;
@@ -80,8 +82,8 @@ public class SimulasiRpm extends AppCompatActivity {
     File gpxfile;
     int jancuk=0;
     private Toast mToastToShow;
-    public int  startDegree=-1, endDegree=0;
-    public double Arpm, rpm, speed = 0.0;
+    public int  startDegree=-1, endDegree=0, Urpm;
+    public double Arpm, rpm = 0.0, speed = 0.0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,8 +95,6 @@ public class SimulasiRpm extends AppCompatActivity {
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        df = new DecimalFormat("#.00");
 
         wheel = (ImageView) findViewById(R.id.wheel);
 
@@ -420,17 +420,20 @@ public class SimulasiRpm extends AppCompatActivity {
             }
         });
 
-        if(Bluetooth.isBtConnected){
-            refresh.setEnabled(false);
-            loger.setEnabled(true);
-            Log.d("stat= ","yes");
-        }
-        else{
-            refresh.setEnabled(false);
+//        if(Bluetooth.isBtConnected){
+//            refresh.setEnabled(false);
+//            loger.setEnabled(true);
+//            Log.d("stat= ","yes");
+//        }
+//        else{
+//            refresh.setEnabled(false);
+//            loger.setEnabled(false);//ini
+//
+//        }
+
+        if(!mulaiSim.isAlive()){
             loger.setEnabled(false);
-
         }
-
         Calendar c = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         strDate = sdf.format(c.getTime());
@@ -440,6 +443,7 @@ public class SimulasiRpm extends AppCompatActivity {
         r.setRepeatCount(Animation.INFINITE);
         r.setInterpolator(new LinearInterpolator());
 
+//        df = new DecimalFormat("#.00");
     }
 
     public void kirimKirimData(View view){
@@ -454,16 +458,19 @@ public class SimulasiRpm extends AppCompatActivity {
             } catch (NumberFormatException e) {
                 e.printStackTrace();
             }
-            setRpm = ambilData;
+            setRpm = (int)ambilData;
             error = nilaiSp - setRpm;
             if (loger.isChecked()){
-                note(this, "Log "+strDate, "posisi = " + ambilData + " error = " + error);
+                note(this, "Log "+strDate, "RPM = " + setRpm + " error = " + error);
             }
 
         }
         else {
             pid();
-            setRpm = Double.parseDouble(df.format(rpm));
+            setRpm = Urpm;
+            if (loger.isChecked()){
+                note(this, "Log "+strDate, "RPM = " + setRpm + " error = " + error);
+            }
         }
 
         if(setRpm >= 120){setRpm = 120;}
@@ -483,7 +490,7 @@ public class SimulasiRpm extends AppCompatActivity {
         tampilError.setText(Double.toString(error));
         tampilRpm.setText(""+ setRpm);
 
-        Log.d("x",""+x);
+//        Log.d("x",""+x);
         x++;
         if(x ==  Integer.MAX_VALUE){
             x = 0;
@@ -498,7 +505,7 @@ public class SimulasiRpm extends AppCompatActivity {
         nilaiKi = Integer.parseInt(tampilKi.getText().toString());
         nilaiKd = Integer.parseInt(tampilKd.getText().toString());
 
-        error = nilaiSp - rpm;
+        error = nilaiSp - Urpm;
 
         P = (nilaiKp* error)/100;
 
@@ -511,15 +518,21 @@ public class SimulasiRpm extends AppCompatActivity {
 //        if(nilaiPID >= 100){nilaiPID = 100;}
 //        if(nilaiPID <= 0){nilaiPID = 0;}
 
-        Log.d("P",""+P);
-        Log.d("error",""+error);
-        Log.d("pid",""+lastPID);
-        Log.d("prifat",""+nilaiPID);
+
+//        Log.d("error",""+error);
+//        Log.d("pid",""+lastPID);
+//        Log.d("prifat",""+nilaiPID);
 
         speed =lastPID;
-        rpm = speed/3.6;
 
-        rpm = Double.parseDouble(df.format(rpm));
+        rpm = speed/3.6;
+//        Log.d("rpma",""+rpm);
+
+        if(rpm != 0){
+            Urpm = (int) rpm+1;
+        }else{
+            Urpm = 0;
+        }
         lastPID = lastPID + nilaiPID;
     }
 
@@ -552,6 +565,7 @@ public class SimulasiRpm extends AppCompatActivity {
         }
 
     }
+
     public void mulaiSimulasi(View view){
         if(rpmBtn.isChecked()){
             graph.setVisibility(View.VISIBLE);
@@ -662,9 +676,8 @@ public class SimulasiRpm extends AppCompatActivity {
         stop.setEnabled(true);
         kirimData.setEnabled(false);
         refresh.setEnabled(false);
+        loger.setEnabled(true);
     }
-
-
 
     public void stopSimulasi(View view){
         flagSim = false;
@@ -694,10 +707,15 @@ public class SimulasiRpm extends AppCompatActivity {
 
         animasiA();
 
+        if(loger.isChecked()){
+            loger.setChecked(false);
+        }
+
         view.setEnabled(false);
         start.setEnabled(true);
         stop.setEnabled(false);
         refresh.setEnabled(true);
+        loger.setEnabled(false);
     }
 
     public void refreshing(View view){
@@ -880,8 +898,12 @@ public class SimulasiRpm extends AppCompatActivity {
 
     public void note(Context context, String sFileName, String sBody) {
         try {
-//            File root = new File(Environment.getExternalStorageDirectory(), "Notes");
-            File root = new File(Environment.getExternalStorageDirectory(), "PIDRPMSimu");
+            File root = new File(Environment.getExternalStorageDirectory(), "Notes");
+//            File root = new File("/sdcard/folderName/", "PIDRPMSimu");
+//
+//            File root = new File(Environment.getExternalStoragePublicDirectory(
+//                    Environment.DIRECTORY_DOWNLOADS), "PIDRPMSimu");
+            Log.d("dimana", root.getPath());
             if (!root.exists()) {
                 root.mkdirs();
             }
@@ -894,6 +916,8 @@ public class SimulasiRpm extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
     }
 
     private class get extends AsyncTask<Void, Void, Void>{
@@ -989,7 +1013,56 @@ public class SimulasiRpm extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        if(loger.isChecked()){
+            loger.setChecked(false);
+        }
+
         animasiA();
+//        loger.setEnabled(false);
+
+        x=0;
+
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if(bluetoothAdapter.isEnabled())
+        {
+            Disconnect();
+            bluetoothAdapter.disable();
+            msg("Bluetooth Disable");
+        }
+        finish();
+
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        SharedPreferences parameter = getSharedPreferences(PREFS_NAME,0);
+        SharedPreferences.Editor editor = parameter.edit();
+        nilaiSp = Integer.parseInt(tampilSp.getText().toString());
+        nilaiKp = Integer.parseInt(tampilKp.getText().toString());
+        nilaiKi = Integer.parseInt(tampilKi.getText().toString());
+        nilaiKd = Integer.parseInt(tampilKd.getText().toString());
+        editor.putInt("saveSp",nilaiSp);
+        editor.putInt("saveKp",nilaiKp);
+        editor.putInt("saveKi",nilaiKi);
+        editor.putInt("saveKd",nilaiKd);
+        editor.commit();
+        flagSim = false;
+        try {
+            if(mulaiSim.isAlive()) {
+                mulaiSim.join();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        if(loger.isChecked()){
+            loger.setChecked(false);
+        }
+
+        animasiA();
+//        loger.setEnabled(false);
 
         x=0;
 
@@ -1022,6 +1095,13 @@ public class SimulasiRpm extends AppCompatActivity {
             e.printStackTrace();
         }
         animasiA();
+
+        if(loger.isChecked()){
+            loger.setChecked(false);
+        }
+
+
+//        loger.setEnabled(false);
 
         start.setEnabled(true);
         x=0;
